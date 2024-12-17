@@ -49,15 +49,15 @@ def _load_dataset():
     for label in raw_labels:
         O_bytes = [int(byte) for byte in hashlib.shake_256(bytearray([int(x) for x in label])).digest(16+232)[16:]]
 
-        for byte in O_bytes:
+        for byte in O_bytes[::4]:
             labels.append(int.bit_count(byte & 0xf))
 
     labels = to_categorical(labels, num_classes=5)
 
     traces_stacked = []
     for trace in raw_traces:
-        for i in range(232):
-            traces_stacked.append(trace[12930 + i * 40 : 12985 + i * 40])
+        for i in range(0, 232, 4):
+            traces_stacked.append(np.concatenate((trace[930 + i * 44 : 985 + i * 44], trace[12930 + i * 40 : 12985 + i * 40])))
 
     traces = np.array(traces_stacked)
     del raw_traces
